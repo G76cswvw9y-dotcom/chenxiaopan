@@ -1,0 +1,2117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>短剧爆款工厂</title>
+<style>
+/* ===== CSS Variables ===== */
+:root {
+  --bg: #0f0f1a;
+  --bg2: #1a1a2e;
+  --surface: #16213e;
+  --ink: #e0e0e0;
+  --muted: #8b8b9a;
+  --rule: #2a2a4a;
+  --accent: #7c3aed;
+  --accent2: #a78bfa;
+}
+
+/* ===== Reset & Base ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: var(--bg); color: var(--ink); overflow: hidden; }
+
+/* ===== Layout ===== */
+.app { display: flex; height: 100vh; width: 100vw; }
+.sidebar { width: 220px; background: var(--bg2); border-right: 1px solid var(--rule); display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 100; }
+.sidebar-header { padding: 24px 20px; border-bottom: 1px solid var(--rule); }
+.sidebar-header h1 { font-size: 18px; font-weight: 700; color: var(--accent2); letter-spacing: 1px; }
+.sidebar-header p { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.nav-list { list-style: none; padding: 12px 0; flex: 1; }
+.nav-item { padding: 14px 24px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; color: var(--muted); font-size: 14px; border-left: 3px solid transparent; }
+.nav-item:hover { background: rgba(124,58,237,0.08); color: var(--ink); }
+.nav-item.active { background: rgba(124,58,237,0.15); color: var(--accent2); border-left-color: var(--accent); }
+.nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { height: 56px; background: var(--bg2); border-bottom: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+.topbar-title { font-size: 16px; font-weight: 600; }
+.topbar-actions { display: flex; gap: 12px; align-items: center; }
+.menu-btn { display: none; background: none; border: none; color: var(--ink); font-size: 20px; cursor: pointer; }
+.content { flex: 1; overflow-y: auto; padding: 24px; }
+.page { display: none; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===== Cards ===== */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 20px; transition: transform 0.2s, box-shadow 0.2s; }
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,0.15); }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--accent2); margin-bottom: 4px; }
+.stat-label { font-size: 13px; color: var(--muted); }
+
+/* ===== Buttons ===== */
+.btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: linear-gradient(135deg, var(--accent), #6d28d9); color: #fff; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124,58,237,0.4); }
+.btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--rule); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent2); }
+.btn-success { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+.btn-success:hover { box-shadow: 0 4px 16px rgba(16,185,129,0.4); }
+
+/* ===== Quick Actions ===== */
+.quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.quick-card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.quick-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.quick-icon { width: 48px; height: 48px; background: rgba(124,58,237,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 24px; }
+.quick-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.quick-desc { font-size: 12px; color: var(--muted); }
+
+/* ===== Section Title ===== */
+.section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.section-title::before { content: ''; width: 4px; height: 16px; background: var(--accent); border-radius: 2px; }
+
+/* ===== Script List ===== */
+.script-list { display: flex; flex-direction: column; gap: 12px; }
+.script-item { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
+.script-info h4 { font-size: 14px; margin-bottom: 4px; }
+.script-meta { font-size: 12px; color: var(--muted); }
+.script-tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; background: rgba(124,58,237,0.15); color: var(--accent2); margin-left: 8px; }
+
+/* ===== Material Grid ===== */
+.material-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+.material-card { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
+.material-card:hover { transform: scale(1.03); border-color: var(--accent); }
+.material-img { width: 100%; height: 100px; background: linear-gradient(135deg, #2a2a4a, #1a1a2e); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+.material-name { padding: 10px; font-size: 13px; text-align: center; }
+
+/* ===== Actor Grid ===== */
+.actor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+.actor-card { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; text-align: center; transition: all 0.2s; }
+.actor-card:hover { border-color: var(--accent); }
+.actor-avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #6d28d9); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 24px; }
+.actor-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.actor-role { font-size: 12px; color: var(--muted); }
+
+/* ===== Form Elements ===== */
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--bg2); border: 1px solid var(--rule); border-radius: 8px; color: var(--ink); font-size: 14px; transition: border-color 0.2s; font-family: inherit; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--accent); }
+.form-textarea { min-height: 100px; resize: vertical; }
+.tag-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { padding: 6px 14px; background: var(--bg2); border: 1px solid var(--rule); border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.tag:hover { border-color: var(--accent); }
+.tag.selected { background: rgba(124,58,237,0.2); border-color: var(--accent); color: var(--accent2); }
+
+/* ===== Video Generator ===== */
+.mode-switch { display: flex; background: var(--bg2); border-radius: 8px; padding: 4px; margin-bottom: 16px; width: fit-content; }
+.mode-btn { padding: 8px 20px; border-radius: 6px; border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 14px; transition: all 0.2s; }
+.mode-btn.active { background: var(--accent); color: #fff; }
+.resolution-group { display: flex; gap: 8px; }
+.res-btn { padding: 6px 14px; background: var(--bg2); border: 1px solid var(--rule); border-radius: 6px; color: var(--muted); cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.res-btn:hover { border-color: var(--accent); }
+.res-btn.selected { background: rgba(124,58,237,0.2); border-color: var(--accent); color: var(--accent2); }
+
+/* ===== Script Output ===== */
+.script-output { background: var(--bg2); border: 1px solid var(--rule); border-radius: 12px; padding: 20px; margin-top: 16px; max-height: 600px; overflow-y: auto; }
+.episode-block { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--rule); }
+.episode-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.episode-title { font-size: 16px; font-weight: 700; color: var(--accent2); margin-bottom: 12px; }
+.scene-block { margin-bottom: 16px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; }
+.scene-title { font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+.scene-desc { font-size: 13px; color: var(--muted); margin-bottom: 8px; line-height: 1.6; }
+.dialogue-line { font-size: 13px; line-height: 1.8; padding: 2px 0; }
+.dialogue-role { color: var(--accent2); font-weight: 600; }
+.dialogue-action { color: var(--muted); font-style: italic; }
+.transition-line { font-size: 12px; color: #f59e0b; margin: 8px 0; font-style: italic; }
+
+/* ===== Toast ===== */
+.toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+.toast { padding: 12px 20px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease; min-width: 200px; }
+.toast.success { border-left: 3px solid #10b981; }
+.toast.error { border-left: 3px solid #ef4444; }
+.toast.info { border-left: 3px solid var(--accent); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+/* ===== Duration Slider ===== */
+.duration-group { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.duration-slider { flex: 1; -webkit-appearance: none; appearance: none; height: 6px; background: var(--rule); border-radius: 3px; outline: none; cursor: pointer; }
+.duration-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 8px rgba(124,58,237,0.4); }
+.duration-value { min-width: 36px; text-align: center; font-weight: 600; color: var(--accent); font-size: 15px; }
+
+/* ===== Image Upload ===== */
+.image-upload-area { border: 2px dashed var(--rule); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+.image-upload-area:hover { border-color: var(--accent); background: rgba(124,58,237,0.05); }
+.image-upload-area.has-image { border-style: solid; border-color: var(--accent); padding: 10px; }
+.image-upload-area .upload-icon { font-size: 32px; margin-bottom: 8px; }
+.image-upload-area .upload-text { color: var(--muted); font-size: 14px; }
+.image-preview { max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover; }
+.image-tag { display: inline-flex; align-items: center; gap: 4px; background: rgba(124,58,237,0.15); border: 1px solid var(--accent); border-radius: 6px; padding: 4px 10px; font-size: 13px; color: var(--accent); margin: 4px; }
+.image-tag .remove-img { cursor: pointer; font-weight: bold; margin-left: 4px; }
+
+/* ===== Loading ===== */
+.loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,15,26,0.85); display: none; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 16px; }
+.loading-overlay.active { display: flex; }
+.spinner { width: 48px; height: 48px; border: 3px solid var(--rule); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { color: var(--muted); font-size: 14px; }
+
+/* ===== Generation Records ===== */
+.record-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.record-item { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+.record-info { font-size: 13px; }
+.record-status { font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+.record-status.done { background: rgba(16,185,129,0.15); color: #10b981; }
+.record-status.pending { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .menu-btn { display: block; }
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+  .content { padding: 16px; }
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ===== Overlay for mobile sidebar ===== */
+.sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
+.sidebar-overlay.active { display: block; }
+
+/* ===== Modal ===== */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,15,26,0.9); display: none; align-items: center; justify-content: center; z-index: 1001; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: var(--bg2); border: 1px solid var(--rule); border-radius: 16px; padding: 28px; width: 440px; max-width: 90vw; box-shadow: 0 16px 48px rgba(0,0,0,0.5); }
+.modal-title { font-size: 18px; font-weight: 700; color: var(--accent2); margin-bottom: 16px; }
+.modal-close { float: right; background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 0; line-height: 1; }
+.modal-close:hover { color: var(--ink); }
+
+/* ===== API Settings Button ===== */
+.api-settings-btn { padding: 10px 20px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; color: var(--muted); cursor: pointer; font-size: 13px; transition: all 0.2s; display: flex; align-items: center; gap: 6px; margin: 12px 16px; }
+.api-settings-btn:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* ===== CORS Warning ===== */
+.cors-warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #f59e0b; line-height: 1.6; display: none; }
+.cors-warning.show { display: block; }
+
+/* ===== Video Player in Record ===== */
+.record-video-wrap { margin-top: 10px; }
+.record-video-wrap video { width: 100%; max-height: 240px; border-radius: 8px; background: #000; }
+.record-actions { display: flex; gap: 8px; margin-top: 8px; }
+.record-actions .btn { padding: 6px 14px; font-size: 12px; }
+.record-status.generating { background: rgba(124,58,237,0.15); color: var(--accent2); animation: pulse 1.5s ease-in-out infinite; }
+.record-status.failed { background: rgba(239,68,68,0.15); color: #ef4444; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.record-detail { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.record-error { font-size: 12px; color: #ef4444; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>短剧爆款工厂</h1>
+      <p>AI驱动的短剧创作平台</p>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+        <span class="nav-icon">&#8962;</span>
+        <span>工作台</span>
+      </li>
+      <li class="nav-item" data-page="materials" onclick="switchPage('materials')">
+        <span class="nav-icon">&#127912;</span>
+        <span>素材库</span>
+      </li>
+      <li class="nav-item" data-page="actors" onclick="switchPage('actors')">
+        <span class="nav-icon">&#128100;</span>
+        <span>演员管理</span>
+      </li>
+      <li class="nav-item" data-page="video" onclick="switchPage('video')">
+        <span class="nav-icon">&#127909;</span>
+        <span>视频生成</span>
+      </li>
+      <li class="nav-item" data-page="script" onclick="switchPage('script')">
+        <span class="nav-icon">&#128221;</span>
+        <span>剧本创作</span>
+      </li>
+    </ul>
+    <button class="api-settings-btn" onclick="openApiSettings()">&#9881; API 设置</button>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="menu-btn" onclick="toggleSidebar()">&#9776;</button>
+        <span class="topbar-title" id="pageTitle">工作台</span>
+      </div>
+      <div class="topbar-actions">
+        <span style="font-size:13px;color:var(--muted);">欢迎回来，创作者</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Dashboard Page -->
+      <div class="page active" id="page-dashboard">
+        <div class="card-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="statScripts">12</div>
+            <div class="stat-label">已完成剧本</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statVideos">8</div>
+            <div class="stat-label">已生成视频</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statActors">24</div>
+            <div class="stat-label">演员库角色</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statMaterials">156</div>
+            <div class="stat-label">素材资源</div>
+          </div>
+        </div>
+
+        <div class="section-title">快捷入口</div>
+        <div class="quick-grid">
+          <div class="quick-card" onclick="switchPage('script')">
+            <div class="quick-icon">&#128221;</div>
+            <div class="quick-title">剧本创作</div>
+            <div class="quick-desc">AI辅助生成爆款剧本</div>
+          </div>
+          <div class="quick-card" onclick="switchPage('video')">
+            <div class="quick-icon">&#127912;</div>
+            <div class="quick-title">分镜设计</div>
+            <div class="quick-desc">智能分镜与场景规划</div>
+          </div>
+          <div class="quick-card" onclick="showToast('AI爆款分析功能开发中...', 'info')">
+            <div class="quick-icon">&#128200;</div>
+            <div class="quick-title">AI爆款分析</div>
+            <div class="quick-desc">分析热门短剧数据</div>
+          </div>
+        </div>
+
+        <div class="section-title">近期热门剧本</div>
+        <div class="script-list">
+          <div class="script-item">
+            <div class="script-info">
+              <h4>穿越之王妃要直播<span class="script-tag">穿越</span></h4>
+              <div class="script-meta">2024-01-15 · 12集 · 播放量 128万</div>
+            </div>
+            <button class="btn btn-secondary" onclick="switchPage('script')">查看</button>
+          </div>
+          <div class="script-item">
+            <div class="script-info">
+              <h4>都市赘婿逆袭记<span class="script-tag">逆袭</span></h4>
+              <div class="script-meta">2024-01-12 · 10集 · 播放量 95万</div>
+            </div>
+            <button class="btn btn-secondary" onclick="switchPage('script')">查看</button>
+          </div>
+          <div class="script-item">
+            <div class="script-info">
+              <h4>仙尊归来<span class="script-tag">修仙</span></h4>
+              <div class="script-meta">2024-01-10 · 15集 · 播放量 210万</div>
+            </div>
+            <button class="btn btn-secondary" onclick="switchPage('script')">查看</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Materials Page -->
+      <div class="page" id="page-materials">
+        <div class="section-title">场景素材</div>
+        <div class="material-grid">
+          <div class="material-card">
+            <div class="material-img">&#127970;</div>
+            <div class="material-name">写字楼</div>
+          </div>
+          <div class="material-card">
+            <div class="material-img">&#127968;</div>
+            <div class="material-name">客厅</div>
+          </div>
+          <div class="material-card">
+            <div class="material-img">&#127963;</div>
+            <div class="material-name">会议室</div>
+          </div>
+          <div class="material-card">
+            <div class="material-img">&#128663;</div>
+            <div class="material-name">街道</div>
+          </div>
+          <div class="material-card">
+            <div class="material-img">&#127984;</div>
+            <div class="material-name">宫殿</div>
+          </div>
+          <div class="material-card">
+            <div class="material-img">&#127796;</div>
+            <div class="material-name">花园</div>
+          </div>
+          <div class="material-card">
+            <div class="material-img">&#127976;</div>
+            <div class="material-name">餐厅</div>
+          </div>
+          <div class="material-card">
+            <div class="material-img">&#128716;</div>
+            <div class="material-name">卧室</div>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:24px;">音乐素材</div>
+        <div class="script-list">
+          <div class="script-item">
+            <div class="script-info">
+              <h4>紧张悬疑背景音乐</h4>
+              <div class="script-meta">时长: 2:30 · 适合: 悬疑、推理场景</div>
+            </div>
+            <button class="btn btn-secondary">试听</button>
+          </div>
+          <div class="script-item">
+            <div class="script-info">
+              <h4>浪漫抒情钢琴曲</h4>
+              <div class="script-meta">时长: 3:15 · 适合: 甜宠、言情场景</div>
+            </div>
+            <button class="btn btn-secondary">试听</button>
+          </div>
+          <div class="script-item">
+            <div class="script-info">
+              <h4>热血激昂战斗曲</h4>
+              <div class="script-meta">时长: 2:45 · 适合: 逆袭、修仙场景</div>
+            </div>
+            <button class="btn btn-secondary">试听</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actors Page -->
+      <div class="page" id="page-actors">
+        <div class="section-title">AI人物生成</div>
+        <div class="form-group">
+          <label class="form-label">角色描述</label>
+          <textarea class="form-textarea" id="actorDesc" placeholder="例如：一位20岁左右的古装女子，气质清冷，眼神坚毅..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="generateActor()">生成角色</button>
+
+        <div class="section-title" style="margin-top:24px;">演员匹配</div>
+        <div class="form-group">
+          <label class="form-label">角色类型</label>
+          <input type="text" class="form-input" id="actorType" placeholder="例如：霸道总裁、古装女主、反派角色...">
+        </div>
+        <button class="btn btn-primary" onclick="matchActor()">匹配演员</button>
+
+        <div class="section-title" style="margin-top:24px;">演员库</div>
+        <div class="actor-grid">
+          <div class="actor-card">
+            <div class="actor-avatar">&#128104;</div>
+            <div class="actor-name">张明</div>
+            <div class="actor-role">男主 / 霸总</div>
+          </div>
+          <div class="actor-card">
+            <div class="actor-avatar">&#128105;</div>
+            <div class="actor-name">李婷</div>
+            <div class="actor-role">女主 / 甜宠</div>
+          </div>
+          <div class="actor-card">
+            <div class="actor-avatar">&#128104;</div>
+            <div class="actor-name">王强</div>
+            <div class="actor-role">反派 / 动作</div>
+          </div>
+          <div class="actor-card">
+            <div class="actor-avatar">&#128105;</div>
+            <div class="actor-name">陈雪</div>
+            <div class="actor-role">女二 / 古装</div>
+          </div>
+          <div class="actor-card">
+            <div class="actor-avatar">&#128104;</div>
+            <div class="actor-name">刘洋</div>
+            <div class="actor-role">男二 / 喜剧</div>
+          </div>
+          <div class="actor-card">
+            <div class="actor-avatar">&#128105;</div>
+            <div class="actor-name">赵敏</div>
+            <div class="actor-role">女主 / 逆袭</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video Page -->
+      <div class="page" id="page-video">
+        <div class="section-title">视频生成</div>
+        <div class="cors-warning" id="corsWarning">
+          由于浏览器跨域限制，直接调用火山引擎 API 可能被拦截。建议通过后端服务转发 API 请求。您可以搭建一个简单的 Node.js 代理服务器来转发请求。
+        </div>
+        <div class="mode-switch">
+          <button class="mode-btn active" id="modeText" onclick="switchMode('text')">文生视频</button>
+          <button class="mode-btn" id="modeImage" onclick="switchMode('image')">图生视频</button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" id="inputLabel">输入描述</label>
+          <textarea class="form-textarea" id="videoInput" placeholder="描述你想要生成的视频内容..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">分辨率</label>
+          <div class="resolution-group">
+            <button class="res-btn" onclick="selectResolution(this, '480P')">480P</button>
+            <button class="res-btn selected" onclick="selectResolution(this, '720P')">720P</button>
+            <button class="res-btn" onclick="selectResolution(this, '1080P')">1080P</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">视频时长</label>
+          <div class="duration-group">
+            <span style="color:var(--muted);font-size:13px;">2秒</span>
+            <input type="range" class="duration-slider" id="durationSlider" min="2" max="12" value="5" step="1" oninput="updateDuration(this.value)">
+            <span style="color:var(--muted);font-size:13px;">12秒</span>
+            <span class="duration-value" id="durationValue">5秒</span>
+          </div>
+        </div>
+
+        <div class="form-group" id="imageUploadGroup" style="display:none;">
+          <label class="form-label">参考图片</label>
+          <div class="image-upload-area" id="imageUploadArea" onclick="document.getElementById('imageFileInput').click()">
+            <div id="imageUploadContent">
+              <div class="upload-icon">&#128247;</div>
+              <div class="upload-text">点击上传参考图片，或拖拽图片到此处</div>
+              <div class="upload-text" style="font-size:12px;margin-top:4px;">支持 JPG、PNG、WebP 格式</div>
+            </div>
+          </div>
+          <input type="file" id="imageFileInput" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+          <div id="imageTags" style="margin-top:8px;"></div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;">
+          <button class="btn btn-primary" onclick="generateVideo()">开始生成</button>
+          <button class="btn btn-secondary" onclick="openApiSettings()">&#9881; API 设置</button>
+        </div>
+
+        <div class="section-title" style="margin-top:24px;">生成记录</div>
+        <div class="record-list" id="videoRecords">
+        </div>
+      </div>
+
+      <!-- Script Page -->
+      <div class="page" id="page-script">
+        <div class="section-title">AI剧本创作</div>
+
+        <div class="form-group">
+          <label class="form-label">剧本标题</label>
+          <input type="text" class="form-input" id="scriptTitle" placeholder="输入剧本标题...">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">剧本类型</label>
+          <div class="tag-group" id="typeTags">
+            <span class="tag" onclick="selectTag(this, 'type')">都市逆袭</span>
+            <span class="tag" onclick="selectTag(this, 'type')">甜宠言情</span>
+            <span class="tag" onclick="selectTag(this, 'type')">玄幻修仙</span>
+            <span class="tag" onclick="selectTag(this, 'type')">悬疑推理</span>
+            <span class="tag" onclick="selectTag(this, 'type')">古装权谋</span>
+            <span class="tag" onclick="selectTag(this, 'type')">家庭伦理</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">集数</label>
+          <div class="tag-group" id="episodeTags">
+            <span class="tag" onclick="selectTag(this, 'episode')">10集</span>
+            <span class="tag" onclick="selectTag(this, 'episode')">12集</span>
+            <span class="tag selected" onclick="selectTag(this, 'episode')">15集</span>
+            <span class="tag" onclick="selectTag(this, 'episode')">20集</span>
+            <span class="tag" onclick="selectTag(this, 'episode')">30集</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">剧情梗概</label>
+          <textarea class="form-textarea" id="scriptOutline" placeholder="描述剧情梗概，例如：一位现代女主播意外穿越到古代，遇到冷酷太子，展开一段啼笑皆非的宫廷故事..."></textarea>
+        </div>
+
+        <div style="display:flex;gap:12px;">
+          <button class="btn btn-primary" onclick="generateScript()">AI生成剧本</button>
+          <button class="btn btn-success" onclick="exportScript()">导出文档</button>
+        </div>
+
+        <div class="script-output" id="scriptOutput" style="display:none;">
+          <div id="scriptContent"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">AI正在创作中...</div>
+</div>
+
+<!-- API Settings Modal -->
+<div class="modal-overlay" id="apiSettingsModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeApiSettings()">&times;</button>
+    <div class="modal-title">火山引擎 API 设置</div>
+    <div class="form-group">
+      <label class="form-label">API Key</label>
+      <input type="password" class="form-input" id="apiKeyInput" placeholder="请输入火山引擎 API Key...">
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+      API Key 将保存在浏览器本地存储中，不会上传到任何服务器。请前往 <a href="https://console.volcengine.com/ark" target="_blank" style="color:var(--accent2);text-decoration:underline;">火山引擎控制台</a> 获取 API Key。
+    </div>
+    <div style="display:flex;gap:12px;">
+      <button class="btn btn-primary" onclick="saveApiKey()">保存</button>
+      <button class="btn btn-secondary" onclick="closeApiSettings()">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Global State =====
+let currentPage = 'dashboard';
+let selectedType = '';
+let selectedEpisodes = '15集';
+let selectedResolution = '720P';
+let videoMode = 'text';
+let generatedScriptData = null;
+
+// ===== Volcano Engine API Config =====
+const VOLCANO_API_BASE = 'https://ark.cn-beijing.volces.com/api/v3/contents/generations/tasks';
+const VOLCANO_T2V_MODEL = 'doubao-seaweed-241128';
+const VOLCANO_I2V_MODEL = 'doubao-seaweed-241128';
+let videoTaskTimers = {};
+
+// ===== Page Switching =====
+function switchPage(page) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector('.nav-item[data-page="' + page + '"]').classList.add('active');
+  const titles = { dashboard: '工作台', materials: '素材库', actors: '演员管理', video: '视频生成', script: '剧本创作' };
+  document.getElementById('pageTitle').textContent = titles[page] || '工作台';
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('active');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+
+// ===== Tag Selection =====
+function selectTag(el, group) {
+  const parent = el.parentElement;
+  parent.querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  if (group === 'type') selectedType = el.textContent;
+  if (group === 'episode') selectedEpisodes = el.textContent;
+}
+
+// ===== Toast Notifications =====
+function showToast(message, type) {
+  type = type || 'info';
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  const icons = { success: '&#10003;', error: '&#10007;', info: '&#9432;' };
+  toast.innerHTML = '<span>' + (icons[type] || '&#9432;') + '</span><span>' + message + '</span>';
+  container.appendChild(toast);
+  setTimeout(() => { toast.remove(); }, 3000);
+}
+
+// ===== Loading =====
+function showLoading(text) {
+  document.getElementById('loadingOverlay').classList.add('active');
+  if (text) document.querySelector('.loading-text').textContent = text;
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+// ===== Video Generator =====
+let videoDuration = 5;
+let uploadedImages = [];
+
+function switchMode(mode) {
+  videoMode = mode;
+  document.getElementById('modeText').classList.toggle('active', mode === 'text');
+  document.getElementById('modeImage').classList.toggle('active', mode === 'image');
+  document.getElementById('inputLabel').textContent = mode === 'text' ? '输入描述' : '输入描述 + 参考图片';
+  document.getElementById('videoInput').placeholder = mode === 'text' ? '描述你想要生成的视频内容...' : '描述视频内容，可结合参考图片生成...';
+  document.getElementById('imageUploadGroup').style.display = mode === 'image' ? 'block' : 'none';
+}
+
+function selectResolution(btn, res) {
+  selectedResolution = res;
+  document.querySelectorAll('.res-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function updateDuration(val) {
+  videoDuration = parseInt(val);
+  document.getElementById('durationValue').textContent = val + '秒';
+}
+
+function handleImageUpload(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    showToast('请上传图片文件', 'error');
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    uploadedImages.push({ name: file.name, data: e.target.result });
+    renderImageTags();
+    showToast('图片上传成功', 'success');
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function renderImageTags() {
+  var container = document.getElementById('imageTags');
+  var uploadArea = document.getElementById('imageUploadArea');
+  var content = document.getElementById('imageUploadContent');
+
+  if (uploadedImages.length > 0) {
+    uploadArea.classList.add('has-image');
+    content.innerHTML = '<img class="image-preview" src="' + uploadedImages[uploadedImages.length - 1].data + '" alt="参考图片">';
+  } else {
+    uploadArea.classList.remove('has-image');
+    content.innerHTML = '<div class="upload-icon">&#128247;</div><div class="upload-text">点击上传参考图片，或拖拽图片到此处</div><div class="upload-text" style="font-size:12px;margin-top:4px;">支持 JPG、PNG、WebP 格式</div>';
+  }
+
+  var tagsHtml = '';
+  for (var i = 0; i < uploadedImages.length; i++) {
+    tagsHtml += '<span class="image-tag">&#128206; ' + uploadedImages[i].name.substring(0, 15) + '<span class="remove-img" onclick="removeImage(' + i + ')">x</span></span>';
+  }
+  container.innerHTML = tagsHtml;
+}
+
+function removeImage(index) {
+  uploadedImages.splice(index, 1);
+  renderImageTags();
+  showToast('已移除图片', 'info');
+}
+
+// ===== API Settings =====
+function openApiSettings() {
+  var savedKey = localStorage.getItem('volcano_api_key') || '';
+  document.getElementById('apiKeyInput').value = savedKey;
+  document.getElementById('apiSettingsModal').classList.add('active');
+}
+
+function closeApiSettings() {
+  document.getElementById('apiSettingsModal').classList.remove('active');
+}
+
+function saveApiKey() {
+  var key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) {
+    showToast('请输入 API Key', 'error');
+    return;
+  }
+  localStorage.setItem('volcano_api_key', key);
+  closeApiSettings();
+  showToast('API Key 已保存', 'success');
+}
+
+function getApiKey() {
+  return localStorage.getItem('volcano_api_key') || '';
+}
+
+// ===== Generate Video (Volcano Engine API) =====
+function generateVideo() {
+  var apiKey = getApiKey();
+  if (!apiKey) {
+    showToast('请先设置火山引擎 API Key', 'error');
+    openApiSettings();
+    return;
+  }
+
+  var input = document.getElementById('videoInput').value.trim();
+  if (!input && uploadedImages.length === 0) {
+    showToast('请输入视频描述或上传参考图片', 'error');
+    return;
+  }
+
+  // Build prompt with parameters
+  var resMap = { '480P': '480p', '720P': '720p', '1080P': '1080p' };
+  var resValue = resMap[selectedResolution] || '720p';
+  var durValue = Math.min(Math.max(videoDuration, 2), 12);
+  var promptText = input + ' --rs ' + resValue + ' --rt 16:9 --dur ' + durValue;
+
+  // Build request body
+  var requestBody = {};
+  if (videoMode === 'image' && uploadedImages.length > 0) {
+    // Image-to-video
+    requestBody = {
+      model: VOLCANO_I2V_MODEL,
+      content: [
+        { type: 'text', text: promptText },
+        {
+          type: 'image_url',
+          image_url: { url: uploadedImages[0].data },
+          role: 'first_frame'
+        }
+      ]
+    };
+  } else {
+    // Text-to-video
+    requestBody = {
+      model: VOLCANO_T2V_MODEL,
+      content: [
+        { type: 'text', text: promptText }
+      ]
+    };
+  }
+
+  // Create record in UI
+  var recordId = 'rec_' + Date.now();
+  var desc = input ? (input.length > 30 ? input.substring(0, 30) + '...' : input) : '图片生成视频';
+  var records = document.getElementById('videoRecords');
+  var item = document.createElement('div');
+  item.className = 'record-item';
+  item.id = recordId;
+  item.innerHTML =
+    '<div>' +
+      '<div class="record-info">' + escapeHtml(desc) + '</div>' +
+      '<div class="record-detail">' + durValue + '秒 · ' + selectedResolution + ' · ' + (videoMode === 'image' ? '图生视频' : '文生视频') + '</div>' +
+      '<div class="record-error" id="' + recordId + '_error" style="display:none;"></div>' +
+      '<div class="record-video-wrap" id="' + recordId + '_video" style="display:none;"></div>' +
+    '</div>' +
+    '<span class="record-status generating" id="' + recordId + '_status">排队中</span>';
+  records.insertBefore(item, records.firstChild);
+
+  // Call API
+  callVolcanoApi(requestBody, apiKey, recordId, desc, durValue);
+}
+
+function escapeHtml(text) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(text));
+  return div.innerHTML;
+}
+
+function callVolcanoApi(requestBody, apiKey, recordId, desc, durValue) {
+  var statusEl = document.getElementById(recordId + '_status');
+  var errorEl = document.getElementById(recordId + '_error');
+
+  fetch(VOLCANO_API_BASE, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey
+    },
+    body: JSON.stringify(requestBody)
+  })
+  .then(function(response) {
+    if (!response.ok) {
+      return response.text().then(function(text) {
+        throw new Error('HTTP ' + response.status + ': ' + text);
+      });
+    }
+    return response.json();
+  })
+  .then(function(data) {
+    var taskId = data.id;
+    if (!taskId) {
+      throw new Error('未获取到任务 ID');
+    }
+    statusEl.textContent = '生成中';
+    showToast('任务已提交，正在生成视频...', 'info');
+    // Start polling
+    pollTaskStatus(taskId, apiKey, recordId, desc, durValue);
+  })
+  .catch(function(err) {
+    console.error('创建视频任务失败:', err);
+    statusEl.textContent = '失败';
+    statusEl.className = 'record-status failed';
+    errorEl.textContent = err.message || '请求失败';
+    errorEl.style.display = 'block';
+
+    // Check if it might be a CORS issue
+    if (err.message && (err.message.indexOf('Failed to fetch') !== -1 || err.message.indexOf('NetworkError') !== -1)) {
+      document.getElementById('corsWarning').classList.add('show');
+      errorEl.textContent = '网络请求失败，可能是 CORS 跨域限制。请查看页面顶部的提示信息。';
+    }
+  });
+}
+
+function pollTaskStatus(taskId, apiKey, recordId, desc, durValue) {
+  var pollCount = 0;
+  var maxPolls = 120; // 120 * 5s = 10 minutes max
+
+  function doPoll() {
+    if (pollCount >= maxPolls) {
+      var statusEl = document.getElementById(recordId + '_status');
+      var errorEl = document.getElementById(recordId + '_error');
+      statusEl.textContent = '超时';
+      statusEl.className = 'record-status failed';
+      errorEl.textContent = '任务轮询超时（超过10分钟），请稍后在火山引擎控制台查看任务状态。';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    pollCount++;
+
+    fetch(VOLCANO_API_BASE + '/' + taskId, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey
+      }
+    })
+    .then(function(response) {
+      if (!response.ok) {
+        throw new Error('HTTP ' + response.status);
+      }
+      return response.json();
+    })
+    .then(function(data) {
+      var statusEl = document.getElementById(recordId + '_status');
+      var videoWrap = document.getElementById(recordId + '_video');
+      var errorEl = document.getElementById(recordId + '_error');
+
+      if (data.status === 'succeeded') {
+        // Success
+        statusEl.textContent = '已完成';
+        statusEl.className = 'record-status done';
+        var videoUrl = data.output && data.output.video_url;
+        if (videoUrl) {
+          videoWrap.style.display = 'block';
+          videoWrap.innerHTML =
+            '<video controls preload="metadata" src="' + escapeHtml(videoUrl) + '"></video>' +
+            '<div class="record-actions">' +
+              '<button class="btn btn-success" onclick="downloadVideo(\'' + escapeHtml(videoUrl) + '\', \'' + escapeHtml(desc) + '\')">&#11015; 下载视频</button>' +
+            '</div>';
+          showToast('视频生成成功！', 'success');
+          // Update stats
+          document.getElementById('statVideos').textContent = parseInt(document.getElementById('statVideos').textContent) + 1;
+        }
+        return;
+      }
+
+      if (data.status === 'failed') {
+        statusEl.textContent = '失败';
+        statusEl.className = 'record-status failed';
+        var failMsg = (data.error && data.error.message) || '任务失败';
+        errorEl.textContent = failMsg;
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      // Still processing: queued, running, etc.
+      var statusText = '生成中';
+      if (data.status === 'queued') statusText = '排队中';
+      statusEl.textContent = statusText;
+
+      // Poll again after 5 seconds
+      videoTaskTimers[recordId] = setTimeout(doPoll, 5000);
+    })
+    .catch(function(err) {
+      console.error('查询任务状态失败:', err);
+      var statusEl = document.getElementById(recordId + '_status');
+      var errorEl = document.getElementById(recordId + '_error');
+      statusEl.textContent = '查询失败';
+      statusEl.className = 'record-status failed';
+      errorEl.textContent = '查询任务状态失败: ' + (err.message || '未知错误');
+      errorEl.style.display = 'block';
+    });
+  }
+
+  doPoll();
+}
+
+// ===== Download Video =====
+function downloadVideo(url, filename) {
+  showToast('正在下载视频...', 'info');
+  fetch(url)
+    .then(function(response) {
+      if (!response.ok) throw new Error('下载失败');
+      return response.blob();
+    })
+    .then(function(blob) {
+      var blobUrl = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = (filename || '视频') + '.mp4';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+      showToast('视频下载完成！', 'success');
+    })
+    .catch(function(err) {
+      showToast('下载失败: ' + (err.message || '请检查网络连接'), 'error');
+    });
+}
+
+// ===== Actor Functions =====
+function generateActor() {
+  const desc = document.getElementById('actorDesc').value.trim();
+  if (!desc) { showToast('请输入角色描述', 'error'); return; }
+  showLoading('AI正在生成角色...');
+  setTimeout(() => {
+    hideLoading();
+    showToast('角色生成成功！已添加到演员库', 'success');
+    document.getElementById('actorDesc').value = '';
+  }, 1500);
+}
+
+function matchActor() {
+  const type = document.getElementById('actorType').value.trim();
+  if (!type) { showToast('请输入角色类型', 'error'); return; }
+  showToast('已匹配到3位合适的演员', 'success');
+}
+
+// ===== Script Generation Core =====
+function generateScript() {
+  const title = document.getElementById('scriptTitle').value.trim();
+  const outline = document.getElementById('scriptOutline').value.trim();
+  if (!title) { showToast('请输入剧本标题', 'error'); return; }
+  if (!outline) { showToast('请输入剧情梗概', 'error'); return; }
+  if (!selectedType) { showToast('请选择剧本类型', 'error'); return; }
+
+  showLoading('AI正在创作剧本...');
+  setTimeout(() => {
+    const script = generateDemoScript(title, selectedType, selectedEpisodes, outline);
+    generatedScriptData = script;
+    document.getElementById('scriptContent').innerHTML = script.html;
+    document.getElementById('scriptOutput').style.display = 'block';
+    hideLoading();
+    showToast('剧本生成成功！', 'success');
+    document.getElementById('statScripts').textContent = parseInt(document.getElementById('statScripts').textContent) + 1;
+  }, 2000);
+}
+
+function generateDemoScript(title, type, episodes, outline) {
+  const epCount = parseInt(episodes);
+  const isCross = /穿越|主播|太子|古代|宫廷|直播/i.test(outline);
+  const isBusiness = /逆袭|商业|总裁|公司|职场|林凡|苏晴/i.test(outline) || type === '都市逆袭';
+  const isCultivation = /修仙|玄幻|叶尘|冷凝霜|苏清雪|仙尊|修炼/i.test(outline) || type === '玄幻修仙';
+  const isSweet = /甜宠|言情|夏小暖|顾北辰|林雅|恋爱/i.test(outline) || type === '甜宠言情';
+
+  let html = '<h2 style="color:var(--accent2);margin-bottom:16px;">' + title + '</h2>';
+  html += '<div style="color:var(--muted);margin-bottom:20px;font-size:13px;">类型：' + type + ' | 集数：' + episodes + '</div>';
+
+  const episodesData = buildEpisodesFromOutline(outline, type, epCount, isCross, isBusiness, isCultivation, isSweet);
+
+  for (let i = 0; i < episodesData.length; i++) {
+    const ep = episodesData[i];
+    html += '<div class="episode-block">';
+    html += '<div class="episode-title">第' + (i + 1) + '集：' + ep.title + '</div>';
+    for (let s = 0; s < ep.scenes.length; s++) {
+      const scene = ep.scenes[s];
+      html += '<div class="scene-block">';
+      html += '<div class="scene-title">场景' + (s + 1) + '：' + scene.location + '</div>';
+      html += '<div class="scene-desc">' + scene.description + '</div>';
+      for (let d = 0; d < scene.dialogues.length; d++) {
+        const dia = scene.dialogues[d];
+        html += '<div class="dialogue-line"><span class="dialogue-role">' + dia.role + '</span> <span class="dialogue-action">' + dia.action + '</span>：' + dia.text + '</div>';
+      }
+      if (scene.transition) {
+        html += '<div class="transition-line">【转场】' + scene.transition + '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  return { html: html, text: buildPlainText(title, type, episodes, episodesData) };
+}
+
+function buildEpisodesFromOutline(outline, type, count, isCross, isBusiness, isCultivation, isSweet) {
+  const episodes = [];
+  const baseEpisodes = Math.min(count, 5);
+
+  for (let i = 1; i <= baseEpisodes; i++) {
+    episodes.push(generateFullScriptEpisode(i, outline, type, isCross, isBusiness, isCultivation, isSweet));
+  }
+
+  for (let i = 6; i <= count; i++) {
+    episodes.push(generateExtraEpisode(i, outline, type, isCross, isBusiness, isCultivation, isSweet, episodes));
+  }
+
+  return episodes;
+}
+
+function generateFullScriptEpisode(epNum, outline, type, isCross, isBusiness, isCultivation, isSweet) {
+  if (isCross) {
+    const titles = ['穿越惊魂', '太子驾到', '冷宫直播', '御前献艺', '真相浮现'];
+    return generateCrossEpisode(epNum, titles[epNum - 1] || '新的篇章');
+  }
+  if (isBusiness) {
+    const titles = ['屈辱归来', '初露锋芒', '商业博弈', '真相大白', '王者归来'];
+    return generateBusinessEpisode(epNum, titles[epNum - 1] || '新的篇章');
+  }
+  if (isCultivation) {
+    const titles = ['废材觉醒', '仙缘初现', '秘境试炼', '强敌来袭', '突破境界'];
+    return generateCultivationEpisode(epNum, titles[epNum - 1] || '新的篇章');
+  }
+  if (isSweet) {
+    const titles = ['意外邂逅', '甜蜜同居', '误会重重', '真情告白', '幸福结局'];
+    return generateSweetEpisode(epNum, titles[epNum - 1] || '新的篇章');
+  }
+  const genericTitles = ['故事开篇', '冲突升级', '危机四伏', '转折出现', '高潮迭起'];
+  return generateGenericEpisode(epNum, genericTitles[epNum - 1] || '新的篇章', type);
+}
+
+function generateCrossEpisode(epNum, title) {
+  const scenes = [];
+  if (epNum === 1) {
+    scenes.push({
+      location: '现代直播间',
+      description: '深夜，女主播苏小暖正在直播间做最后一场告别直播。她穿着时尚的现代服装，对着镜头挥手。',
+      dialogues: [
+        { role: '苏小暖', action: '(对着镜头微笑)', text: '宝宝们，今天是我最后一次直播啦，我要去追求我的梦想了！' },
+        { role: '弹幕', action: '(滚动)', text: '不要走！暖暖我们舍不得你！' }
+      ],
+      transition: '突然一道闪电划过，苏小暖眼前一黑'
+    });
+    scenes.push({
+      location: '古代宫殿庭院',
+      description: '苏小暖醒来，发现自己躺在陌生的庭院中，周围是古色古香的建筑，身穿华丽古装的男子正冷冷地看着她。',
+      dialogues: [
+        { role: '苏小暖', action: '(揉着眼睛坐起来)', text: '这是哪啊？拍摄现场吗？你们剧组也太专业了吧...' },
+        { role: '太子萧瑾', action: '(皱眉，居高临下)', text: '你是何人？为何出现在本宫的寝宫之中？' },
+        { role: '苏小暖', action: '(打量对方，眼睛发亮)', text: '哇，这演员质量可以啊！帅哥，你是哪个公司的？要不要考虑做主播？' }
+      ],
+      transition: '太子脸色阴沉，侍卫拔刀上前'
+    });
+    scenes.push({
+      location: '宫殿大殿',
+      description: '苏小暖被带到金碧辉煌的大殿上，她仍然以为自己是在剧组，好奇地东张西望。',
+      dialogues: [
+        { role: '苏小暖', action: '(兴奋地拍照)', text: '这布景花了多少钱啊？太逼真了！宝宝们，你们看这是真龙椅！' },
+        { role: '太子萧瑾', action: '(冷冷地)', text: '此女言行怪异，先关入偏殿，待查明身份再做处置。' },
+        { role: '苏小暖', action: '(愣住)', text: '等等，这不是演戏？你们来真的？！' }
+      ],
+      transition: '苏小暖被带走，太子若有所思地看着她的背影'
+    });
+    scenes.push({
+      location: '偏殿',
+      description: '苏小暖独自坐在偏殿中，终于意识到自己真的穿越了，开始慌乱起来。',
+      dialogues: [
+        { role: '苏小暖', action: '(焦急地踱步)', text: '完了完了，我真的穿越了！手机没信号，这里连WiFi都没有！' },
+        { role: '苏小暖', action: '(突然想到什么)', text: '等等，既然我能穿越过来，那一定也能穿越回去！我得先活下去...' },
+        { role: '侍女小桃', action: '(怯生生地进来)', text: '姑娘，太子殿下让我给您送些吃食...' }
+      ],
+      transition: '苏小暖眼中闪过一丝坚定'
+    });
+  } else if (epNum === 2) {
+    scenes.push({
+      location: '偏殿',
+      description: '清晨，苏小暖在偏殿醒来，侍女小桃正在为她梳妆。',
+      dialogues: [
+        { role: '苏小暖', action: '(看着铜镜中的自己)', text: '这古代妆容还挺好看的，要是能直播化妆教程肯定火...' },
+        { role: '侍女小桃', action: '(好奇地)', text: '姑娘说的直播是什么？是新的歌舞吗？' },
+        { role: '苏小暖', action: '(叹气)', text: '说了你也不懂，对了小桃，那个冷冰冰的太子是什么来头？' }
+      ],
+      transition: '殿外传来脚步声'
+    });
+    scenes.push({
+      location: '太子书房',
+      description: '苏小暖被带到太子书房，萧瑾正在批阅奏折，头也不抬。',
+      dialogues: [
+        { role: '太子萧瑾', action: '(放下毛笔)', text: '说吧，你究竟是何人派来的？敌国奸细？还是...' },
+        { role: '苏小暖', action: '(打断)', text: '停停停！我说了我叫苏小暖，来自21世纪，是个主播！' },
+        { role: '太子萧瑾', action: '(冷笑)', text: '21世纪？本宫从未听闻此地。你若不说实话，休怪本宫无情。' }
+      ],
+      transition: '苏小暖急得直跺脚'
+    });
+    scenes.push({
+      location: '书房外走廊',
+      description: '苏小暖被侍卫押着往外走，她一边走一边大喊。',
+      dialogues: [
+        { role: '苏小暖', action: '(挣扎着回头)', text: '我说的都是真的！我知道你们不信，但我可以证明！' },
+        { role: '太子萧瑾', action: '(走出书房)', text: '哦？你如何证明？' },
+        { role: '苏小暖', action: '(眼睛一亮)', text: '我会唱歌！会跳舞！还会讲你们从来没听过的故事！' }
+      ],
+      transition: '太子微微挑眉，示意侍卫停下'
+    });
+    scenes.push({
+      location: '书房',
+      description: '苏小暖站在书房中央，清了清嗓子，开始唱一首现代流行歌曲。',
+      dialogues: [
+        { role: '苏小暖', action: '(深情演唱)', text: '(唱起一首抒情歌曲)' },
+        { role: '太子萧瑾', action: '(眼中闪过惊讶)', text: '这曲调...从未听闻，却莫名动人。' },
+        { role: '苏小暖', action: '(得意地)', text: '怎么样？现在信了吧？我可是有真本事的！' },
+        { role: '太子萧瑾', action: '(恢复冷漠)', text: '暂且留你，但若敢耍花样，定不轻饶。' }
+      ],
+      transition: '苏小暖松了口气，心中暗喜'
+    });
+  } else if (epNum === 3) {
+    scenes.push({
+      location: '冷宫',
+      description: '苏小暖因为得罪了贵妃，被打入冷宫。这里破败荒凉，但她却一点都不沮丧。',
+      dialogues: [
+        { role: '苏小暖', action: '(环顾四周)', text: '冷宫就冷宫，正好清净！我可以搞我的直播事业了！' },
+        { role: '侍女小桃', action: '(哭着)', text: '姑娘，您怎么还笑得出来？进了冷宫就出不去了...' },
+        { role: '苏小暖', action: '(拍拍小桃肩膀)', text: '放心，你家姑娘我有的是办法！来，帮我找些材料来！' }
+      ],
+      transition: '苏小暖开始收集各种材料'
+    });
+    scenes.push({
+      location: '冷宫院内',
+      description: '苏小暖用找到的铜镜、丝绸和木炭，制作了一个简易的"直播装置"。',
+      dialogues: [
+        { role: '苏小暖', action: '(对着铜镜整理头发)', text: '各位宝宝们，欢迎来到苏小暖的冷宫直播间！今天给大家表演古代版美妆教程！' },
+        { role: '侍女小桃', action: '(疑惑地)', text: '姑娘在跟谁说话呢？' },
+        { role: '苏小暖', action: '(眨眼)', text: '我在跟我的"观众"说话呢！虽然看不到弹幕，但我可以想象！' }
+      ],
+      transition: '几个路过的宫女被吸引，偷偷围观'
+    });
+    scenes.push({
+      location: '冷宫门口',
+      description: '越来越多的宫女太监聚集在冷宫门口，看苏小暖表演各种"才艺"。',
+      dialogues: [
+        { role: '宫女甲', action: '(兴奋地)', text: '这个苏姑娘好厉害！她讲的故事我从没听过！' },
+        { role: '太监乙', action: '(点头)', text: '她唱的歌也特别好听，比教坊司的还好！' },
+        { role: '苏小暖', action: '(在院内表演)', text: '下面给大家带来一段脱口秀——《论太子的三百个缺点》！' }
+      ],
+      transition: '消息传到太子耳中'
+    });
+    scenes.push({
+      location: '冷宫',
+      description: '太子萧瑾突然驾到，所有人都跪下了，只有苏小暖还站着。',
+      dialogues: [
+        { role: '太子萧瑾', action: '(似笑非笑)', text: '听说你在冷宫过得挺滋润？还编排本宫的缺点？' },
+        { role: '苏小暖', action: '(心虚但强装镇定)', text: '那个...艺术创作嘛，都是虚构的！殿下您大人有大量...' },
+        { role: '太子萧瑾', action: '(走近)', text: '本宫倒是好奇，你还有多少本事是本宫不知道的？' },
+        { role: '苏小暖', action: '(眼睛一转)', text: '那可多了！殿下要不要投资我的"娱乐事业"？' }
+      ],
+      transition: '太子嘴角微微上扬'
+    });
+  } else if (epNum === 4) {
+    scenes.push({
+      location: '皇宫大殿',
+      description: '皇帝突然召见苏小暖，要她在御前献艺。满朝文武都在场。',
+      dialogues: [
+        { role: '皇帝', action: '(威严地)', text: '朕听闻太子府中有一奇女子，今日倒要见识见识。' },
+        { role: '苏小暖', action: '(紧张但故作镇定)', text: '民女苏小暖，参见陛下！今天给大家带来一段特别的表演！' },
+        { role: '太子萧瑾', action: '(站在一旁，目光关切)', text: '(低声)小心应对。' }
+      ],
+      transition: '苏小暖深吸一口气'
+    });
+    scenes.push({
+      location: '大殿中央',
+      description: '苏小暖表演了一段结合现代街舞和古典舞的独创舞蹈，惊艳全场。',
+      dialogues: [
+        { role: '苏小暖', action: '(翩翩起舞)', text: '(随着心中的节拍舞动)' },
+        { role: '大臣甲', action: '(惊叹)', text: '这舞姿...前所未见！' },
+        { role: '贵妃', action: '(嫉妒地)', text: '不过是些歪门邪道！' }
+      ],
+      transition: '舞蹈结束，全场寂静'
+    });
+    scenes.push({
+      location: '大殿',
+      description: '突然，一名刺客从梁上跃下，直扑皇帝。场面大乱。',
+      dialogues: [
+        { role: '刺客', action: '(挥剑)', text: '狗皇帝受死！' },
+        { role: '苏小暖', action: '(本能地冲上去)', text: '小心！' },
+        { role: '太子萧瑾', action: '(拔剑护在苏小暖身前)', text: '退后！' }
+      ],
+      transition: '太子与刺客交手'
+    });
+    scenes.push({
+      location: '大殿',
+      description: '太子击退刺客，但手臂受伤。苏小暖赶紧上前查看。',
+      dialogues: [
+        { role: '苏小暖', action: '(焦急地)', text: '你受伤了！让我看看！' },
+        { role: '太子萧瑾', action: '(淡淡地)', text: '小伤而已，你没事就好。' },
+        { role: '皇帝', action: '(感动地)', text: '此女忠心可嘉！太子，这女子你要好生对待。' },
+        { role: '苏小暖', action: '(脸红)', text: '陛下过奖了...' }
+      ],
+      transition: '贵妃眼中闪过阴狠'
+    });
+  } else {
+    scenes.push({
+      location: '太子书房',
+      description: '太子派人调查苏小暖的来历，却一无所获。',
+      dialogues: [
+        { role: '暗卫', action: '(单膝跪地)', text: '殿下，属下查遍天下，没有苏小暖此人的任何记录。' },
+        { role: '太子萧瑾', action: '(沉思)', text: '她说的21世纪...难道真的是来自另一个世界？' },
+        { role: '苏小暖', action: '(推门进来)', text: '殿下，我想到回去的办法了！' }
+      ],
+      transition: '太子眼神复杂'
+    });
+    scenes.push({
+      location: '皇宫花园',
+      description: '苏小暖在花园中"表演仙术"——其实是简单的科学小实验，却让古人惊叹不已。',
+      dialogues: [
+        { role: '苏小暖', action: '(拿着玻璃杯)', text: '看好了，这是"仙术"——彩虹制造术！' },
+        { role: '宫女们', action: '(惊呼)', text: '好漂亮！真的是彩虹！' },
+        { role: '太子萧瑾', action: '(站在远处微笑)', text: '这女子，总能给人惊喜。' }
+      ],
+      transition: '贵妃带着人气势汹汹地走来'
+    });
+    scenes.push({
+      location: '花园',
+      description: '贵妃指控苏小暖是妖女，要烧死她。',
+      dialogues: [
+        { role: '贵妃', action: '(指着苏小暖)', text: '陛下！此女会妖术！留她在宫中必生祸端！' },
+        { role: '苏小暖', action: '(冷静地)', text: '这不是妖术，是科学！我可以解释！' },
+        { role: '太子萧瑾', action: '(挡在苏小暖面前)', text: '母妃，苏姑娘救过父皇，岂能恩将仇报？' }
+      ],
+      transition: '皇帝陷入犹豫'
+    });
+    scenes.push({
+      location: '大殿',
+      description: '最终，苏小暖用更多"仙术"证明了自己不是妖女，反而被封为"奇女子"。',
+      dialogues: [
+        { role: '皇帝', action: '(大笑)', text: '好一个奇女子！朕封你为"御前供奉"，专司娱乐之事！' },
+        { role: '苏小暖', action: '(开心)', text: '谢陛下！那我可以在宫里开"直播间"了吗？' },
+        { role: '太子萧瑾', action: '(无奈又宠溺)', text: '你呀...真是无时无刻不忘你的直播。' },
+        { role: '苏小暖', action: '(眨眼)', text: '那是！我可是要成为古代第一网红的人！' }
+      ],
+      transition: '故事未完待续...'
+    });
+  }
+  return { title: title, scenes: scenes };
+}
+
+function generateBusinessEpisode(epNum, title) {
+  const scenes = [];
+  const roles = ['林凡', '苏晴', '林天', '王总', '秘书小李'];
+  if (epNum === 1) {
+    scenes.push({
+      location: '林家别墅',
+      description: '林凡被赶出林家，曾经的天才少年如今一无所有。',
+      dialogues: [
+        { role: '林天', action: '(冷笑)', text: '林凡，你已经不是林家的人了，滚吧。' },
+        { role: '林凡', action: '(握拳)', text: '林天，你夺我家产，这笔账我记下了。' },
+        { role: '苏晴', action: '(站在一旁欲言又止)', text: '林凡...' }
+      ],
+      transition: '林凡转身离开，背影孤独'
+    });
+    scenes.push({
+      location: '街头',
+      description: '林凡流落街头，回忆起三年前的车祸，那场车祸让他失去了继承权。',
+      dialogues: [
+        { role: '林凡', action: '(看着天空)', text: '三年了，我隐忍三年，就是为了今天。' },
+        { role: '神秘老人', action: '(突然出现)', text: '年轻人，我看你骨骼清奇，这本商业秘籍送给你。' },
+        { role: '林凡', action: '(接过书)', text: '这是...《商业帝国养成手册》？' }
+      ],
+      transition: '林凡眼中燃起希望'
+    });
+    scenes.push({
+      location: '出租屋',
+      description: '林凡在狭小的出租屋里研究秘籍，发现里面记录着无数商业机密。',
+      dialogues: [
+        { role: '林凡', action: '(兴奋地)', text: '原来当年车祸是林天设计的！这些证据足够了！' },
+        { role: '林凡', action: '(冷静分析)', text: '不急，我要一步步来，先建立自己的商业版图。' },
+        { role: '房东', action: '(敲门)', text: '房租该交了！' }
+      ],
+      transition: '林凡露出自信的微笑'
+    });
+    scenes.push({
+      location: '咖啡厅',
+      description: '林凡用秘籍中的方法，成功投资第一桶金，在咖啡厅与投资人会面。',
+      dialogues: [
+        { role: '投资人王总', action: '(惊讶)', text: '年轻人，你的眼光很毒辣啊！这个项目我投了！' },
+        { role: '林凡', action: '(握手)', text: '王总，合作愉快。这只是开始。' },
+        { role: '林凡', action: '(内心独白)', text: '林天，等着吧，我回来了。' }
+      ],
+      transition: '林凡走出咖啡厅，阳光洒在他身上'
+    });
+  } else if (epNum === 2) {
+    scenes.push({
+      location: '新公司办公室',
+      description: '三个月后，林凡的公司初具规模，他招募了第一批员工。',
+      dialogues: [
+        { role: '秘书小李', action: '(汇报)', text: '林总，我们的APP上线首周下载量突破十万！' },
+        { role: '林凡', action: '(点头)', text: '很好，下一步准备收购林氏集团的供应链。' },
+        { role: '秘书小李', action: '(惊讶)', text: '林氏集团？那不是...' },
+        { role: '林凡', action: '(冷笑)', text: '没错，就是我那个"好弟弟"的公司。' }
+      ],
+      transition: '办公室外，苏晴犹豫着要不要进来'
+    });
+    scenes.push({
+      location: '公司走廊',
+      description: '苏晴找到林凡，告诉他林天正在策划一个大项目。',
+      dialogues: [
+        { role: '苏晴', action: '(担忧)', text: '林凡，林天要在城西开发地产项目，那是你的机会。' },
+        { role: '林凡', action: '(看着她)', text: '你为什么帮我？' },
+        { role: '苏晴', action: '(低头)', text: '因为...我一直相信你。' }
+      ],
+      transition: '林凡眼神柔和了一瞬'
+    });
+    scenes.push({
+      location: '拍卖会',
+      description: '林凡出现在土地拍卖会上，与林天正面交锋。',
+      dialogues: [
+        { role: '林天', action: '(嘲讽)', text: '哟，这不是被赶出家门的废物吗？你也配来拍卖会？' },
+        { role: '林凡', action: '(淡然)', text: '林天，这块地我要了，你出多少我都跟。' },
+        { role: '拍卖师', action: '(敲锤)', text: '三个亿第一次...' }
+      ],
+      transition: '林天脸色铁青'
+    });
+    scenes.push({
+      location: '拍卖会后台',
+      description: '林凡成功拍下地块，林天气急败坏地找上门来。',
+      dialogues: [
+        { role: '林天', action: '(愤怒)', text: '你哪来的钱？一定是偷了林家的！' },
+        { role: '林凡', action: '(拿出文件)', text: '看清楚，这是我合法赚的钱。倒是你，挪用公款的证据，要我公开吗？' },
+        { role: '林天', action: '(脸色大变)', text: '你...你怎么知道？' },
+        { role: '林凡', action: '(逼近)', text: '我知道的，远不止这些。' }
+      ],
+      transition: '林天落荒而逃'
+    });
+  } else if (epNum === 3) {
+    scenes.push({
+      location: '林氏集团会议室',
+      description: '林天召集董事会，想要弹劾林凡，却发现大势已去。',
+      dialogues: [
+        { role: '林天', action: '(拍桌子)', text: '林凡是我们的敌人！必须联手对付他！' },
+        { role: '董事甲', action: '(犹豫)', text: '可是...林凡现在的公司市值已经超过我们了。' },
+        { role: '董事乙', action: '(附和)', text: '而且他的商业模式确实更先进。' }
+      ],
+      transition: '林天暴怒'
+    });
+    scenes.push({
+      location: '林凡公司',
+      description: '林凡收到消息，林天准备用卑鄙手段对付他。',
+      dialogues: [
+        { role: '秘书小李', action: '(焦急)', text: '林总，林天派人去挖我们的核心团队了！' },
+        { role: '林凡', action: '(淡定)', text: '让他挖，核心代码在我脑子里，他挖不走。' },
+        { role: '林凡', action: '(打电话)', text: '启动B计划。' }
+      ],
+      transition: '林凡胸有成竹'
+    });
+    scenes.push({
+      location: '新闻发布会',
+      description: '林凡召开新闻发布会，宣布与林氏集团的合作——其实是吞并的第一步。',
+      dialogues: [
+        { role: '记者', action: '(提问)', text: '林总，您和林氏集团是什么关系？' },
+        { role: '林凡', action: '(微笑)', text: '很快，林氏集团将并入我的商业版图。' },
+        { role: '林天', action: '(在台下咬牙切齿)', text: '林凡，你别得意！' }
+      ],
+      transition: '闪光灯不断'
+    });
+    scenes.push({
+      location: '林家老宅',
+      description: '林凡回到老宅，面对曾经赶他出门的家族长辈。',
+      dialogues: [
+        { role: '林家长辈', action: '(尴尬)', text: '凡儿，当年是我们错了...' },
+        { role: '林凡', action: '(平静)', text: '我不怪你们，但林天必须付出代价。' },
+        { role: '林天', action: '(冲进来)', text: '林凡！你敢动我，我就把你当年的丑事全抖出来！' },
+        { role: '林凡', action: '(冷笑)', text: '我有什么丑事？倒是你，证据我已经交给警方了。' }
+      ],
+      transition: '警笛声响起'
+    });
+  } else if (epNum === 4) {
+    scenes.push({
+      location: '警察局',
+      description: '林天被捕，但他拒不认罪，声称有更大的幕后黑手。',
+      dialogues: [
+        { role: '林天', action: '(疯狂)', text: '林凡！你以为赢了吗？真正的敌人不是我！' },
+        { role: '林凡', action: '(皱眉)', text: '什么意思？' },
+        { role: '林天', action: '(诡笑)', text: '三年前那场车祸，是有人指使我做的...' }
+      ],
+      transition: '林凡心中一震'
+    });
+    scenes.push({
+      location: '医院',
+      description: '林凡去探望因车祸瘫痪的父亲，父亲终于说出真相。',
+      dialogues: [
+        { role: '林父', action: '(虚弱地)', text: '凡儿...对不起，当年是我太偏心...' },
+        { role: '林凡', action: '(握住父亲的手)', text: '爸，别说了，您好好休息。' },
+        { role: '林父', action: '(艰难地)', text: '小心...你二叔...他才是...' }
+      ],
+      transition: '心电监护仪发出警报'
+    });
+    scenes.push({
+      location: '林凡办公室',
+      description: '林凡调查二叔林震，发现他一直暗中操控林家的一切。',
+      dialogues: [
+        { role: '秘书小李', action: '(递文件)', text: '林总，查到了！二叔这些年在海外转移了巨额资产！' },
+        { role: '林凡', action: '(愤怒)', text: '原来他才是幕后黑手！林天不过是他的棋子！' },
+        { role: '苏晴', action: '(走进来)', text: '林凡，我查到二叔明天要出境。' }
+      ],
+      transition: '林凡眼神坚定'
+    });
+    scenes.push({
+      location: '机场',
+      description: '林凡带人在机场拦截二叔林震，一场正面对决展开。',
+      dialogues: [
+        { role: '林震', action: '(冷笑)', text: '林凡，你比你父亲聪明，但还不够。' },
+        { role: '林凡', action: '(拿出证据)', text: '二叔，这些够你在监狱里待一辈子了。' },
+        { role: '林震', action: '(脸色大变)', text: '你怎么会...来人，给我解决他！' },
+        { role: '警察', action: '(冲出)', text: '不许动！警察！' }
+      ],
+      transition: '林震被制服'
+    });
+  } else {
+    scenes.push({
+      location: '法院',
+      description: '林震和林天被判刑，林家终于恢复了平静。',
+      dialogues: [
+        { role: '法官', action: '(宣判)', text: '被告人林震、林天，罪名成立...' },
+        { role: '林凡', action: '(闭目)', text: '爸，我为您报仇了。' },
+        { role: '苏晴', action: '(站在他身边)', text: '林凡，一切都结束了。' }
+      ],
+      transition: '林凡走出法院'
+    });
+    scenes.push({
+      location: '林氏集团新总部',
+      description: '林凡正式接管林氏集团，并将其与自己的公司合并，成立新的商业帝国。',
+      dialogues: [
+        { role: '秘书小李', action: '(兴奋)', text: '林总，新公司上市首日股价暴涨！' },
+        { role: '林凡', action: '(站在落地窗前)', text: '这只是开始，我要让林氏成为世界第一。' },
+        { role: '苏晴', action: '(微笑)', text: '我相信你。' }
+      ],
+      transition: '阳光洒满办公室'
+    });
+    scenes.push({
+      location: '林家老宅',
+      description: '林凡推着康复的父亲在老宅花园散步。',
+      dialogues: [
+        { role: '林父', action: '(感慨)', text: '凡儿，爸爸对不起你...' },
+        { role: '林凡', action: '(微笑)', text: '爸，都过去了，我们是一家人。' },
+        { role: '苏晴', action: '(端着茶走来)', text: '叔叔，喝茶。' }
+      ],
+      transition: '温馨的画面'
+    });
+    scenes.push({
+      location: '海边',
+      description: '林凡和苏晴在海边，他终于向她表白。',
+      dialogues: [
+        { role: '林凡', action: '(认真)', text: '苏晴，这些年谢谢你一直陪着我。' },
+        { role: '苏晴', action: '(脸红)', text: '我...我只是...' },
+        { role: '林凡', action: '(握住她的手)', text: '做我女朋友吧，不是以合作伙伴的身份。' },
+        { role: '苏晴', action: '(含泪点头)', text: '我愿意。' }
+      ],
+      transition: '夕阳西下，两人相拥'
+    });
+  }
+  return { title: title, scenes: scenes };
+}
+
+function generateCultivationEpisode(epNum, title) {
+  const scenes = [];
+  if (epNum === 1) {
+    scenes.push({
+      location: '叶家后山',
+      description: '叶尘被同族子弟欺负，推下悬崖，却意外觉醒灵根。',
+      dialogues: [
+        { role: '叶尘', action: '(坠落中)', text: '我不甘心！凭什么我是废物！' },
+        { role: '神秘声音', action: '(回荡)', text: '万年轮回，终于等到你了...' },
+        { role: '叶尘', action: '(落地)', text: '这是...哪里？' }
+      ],
+      transition: '一道金光没入叶尘体内'
+    });
+    scenes.push({
+      location: '神秘洞府',
+      description: '叶尘发现上古仙尊的洞府，获得传承。',
+      dialogues: [
+        { role: '上古仙尊残魂', action: '(飘渺)', text: '吾乃万年前陨落的玄天仙尊，今日将毕生修为传于你。' },
+        { role: '叶尘', action: '(跪地)', text: '弟子叶尘，拜见师尊！' },
+        { role: '仙尊', action: '(微笑)', text: '去吧，重振我玄天一脉！' }
+      ],
+      transition: '叶尘浑身散发金光'
+    });
+    scenes.push({
+      location: '叶家演武场',
+      description: '叶尘回到叶家，正好遇到家族大比。',
+      dialogues: [
+        { role: '叶家子弟甲', action: '(嘲笑)', text: '废物叶尘也敢来参加大比？' },
+        { role: '叶尘', action: '(平静)', text: '是不是废物，打过才知道。' },
+        { role: '冷凝霜', action: '(在远处观望)', text: '这个叶尘...好像不一样了。' }
+      ],
+      transition: '叶尘走上擂台'
+    });
+    scenes.push({
+      location: '擂台',
+      description: '叶尘一招击败曾经的"天才"，震惊全场。',
+      dialogues: [
+        { role: '叶家子弟甲', action: '(吐血倒地)', text: '不可能！你怎么会这么强！' },
+        { role: '叶尘', action: '(收拳)', text: '我说过，我不是废物。' },
+        { role: '叶家族长', action: '(震惊)', text: '这...这是筑基期？！' },
+        { role: '叶尘', action: '(看向远方)', text: '这只是开始。' }
+      ],
+      transition: '全场哗然'
+    });
+  } else if (epNum === 2) {
+    scenes.push({
+      location: '青云宗山门',
+      description: '叶尘拜入青云宗，开始正式修仙之路。',
+      dialogues: [
+        { role: '守门弟子', action: '(傲慢)', text: '哪里来的散修？青云宗可不是什么阿猫阿狗都能进的。' },
+        { role: '叶尘', action: '(拿出推荐信)', text: '这是玄天令，够资格了吗？' },
+        { role: '守门弟子', action: '(脸色大变)', text: '玄...玄天令？！快请进！' }
+      ],
+      transition: '叶尘大步走入山门'
+    });
+    scenes.push({
+      location: '青云宗外门',
+      description: '叶尘在外门遇到苏清雪，两人因误会结下梁子。',
+      dialogues: [
+        { role: '苏清雪', action: '(冷着脸)', text: '你踩到我的灵草了！' },
+        { role: '叶尘', action: '(道歉)', text: '对不起，我没注意。' },
+        { role: '苏清雪', action: '(不依不饶)', text: '一句对不起就算了？这可是三品灵草！' }
+      ],
+      transition: '冷凝霜出现调解'
+    });
+    scenes.push({
+      location: '藏经阁',
+      description: '叶尘在藏经阁发现一本被遗弃的上古功法。',
+      dialogues: [
+        { role: '叶尘', action: '(翻阅古籍)', text: '《九转玄功》...这功法怎么没人练？' },
+        { role: '藏经阁长老', action: '(摇头)', text: '此功法需九死一生才能大成，千百年来无人成功。' },
+        { role: '叶尘', action: '(眼神坚定)', text: '我要试试。' }
+      ],
+      transition: '长老叹息'
+    });
+    scenes.push({
+      location: '修炼密室',
+      description: '叶尘闭关修炼《九转玄功》，经历九次生死轮回，终于突破第一层。',
+      dialogues: [
+        { role: '叶尘', action: '(浑身是汗)', text: '第九转了...还差最后一步！' },
+        { role: '叶尘', action: '(怒吼)', text: '给我破！' },
+        { role: '叶尘', action: '(睁开双眼，精光四射)', text: '成功了！筑基后期！' }
+      ],
+      transition: '密室大门打开'
+    });
+  } else if (epNum === 3) {
+    scenes.push({
+      location: '秘境入口',
+      description: '青云宗组织弟子进入秘境试炼，叶尘报名参加。',
+      dialogues: [
+        { role: '苏清雪', action: '(挑衅)', text: '叶尘，秘境里可没人保护你，别死在里面。' },
+        { role: '叶尘', action: '(微笑)', text: '放心，我会活着出来的，还要拿第一。' },
+        { role: '冷凝霜', action: '(递丹药)', text: '拿着，保命用的。' }
+      ],
+      transition: '秘境大门开启'
+    });
+    scenes.push({
+      location: '秘境森林',
+      description: '叶尘在秘境中遭遇妖兽袭击，展现惊人实力。',
+      dialogues: [
+        { role: '叶尘', action: '(拔剑)', text: '三阶妖兽？正好试试我的新功法！' },
+        { role: '妖兽', action: '(咆哮)', text: '(发出震耳欲聋的吼声)' },
+        { role: '叶尘', action: '(一剑斩出)', text: '九转剑气，破！' }
+      ],
+      transition: '妖兽倒地'
+    });
+    scenes.push({
+      location: '秘境深处',
+      description: '叶尘发现秘境深处的上古遗迹，里面有无数宝物。',
+      dialogues: [
+        { role: '叶尘', action: '(看着满室宝物)', text: '这是...上古炼丹炉？还有这些丹方！' },
+        { role: '神秘声音', action: '(警告)', text: '擅闯者，死！' },
+        { role: '叶尘', action: '(警惕)', text: '谁？出来！' }
+      ],
+      transition: '一道黑影闪过'
+    });
+    scenes.push({
+      location: '遗迹核心',
+      description: '叶尘与遗迹守护者大战，最终获得认可，得到传承。',
+      dialogues: [
+        { role: '守护者', action: '(赞许)', text: '万年等待，终于有人通过考验了。' },
+        { role: '叶尘', action: '(行礼)', text: '晚辈叶尘，谢前辈传承！' },
+        { role: '守护者', action: '(消散前)', text: '记住，修仙之路，修心为上...' }
+      ],
+      transition: '叶尘获得一枚神秘戒指'
+    });
+  } else if (epNum === 4) {
+    scenes.push({
+      location: '青云宗广场',
+      description: '叶尘从秘境归来，实力大增，引起宗门长老注意。',
+      dialogues: [
+        { role: '大长老', action: '(打量叶尘)', text: '此子气息沉稳，根基扎实，不错。' },
+        { role: '二长老', action: '(嫉妒)', text: '不过是运气好罢了。' },
+        { role: '叶尘', action: '(不卑不亢)', text: '弟子叶尘，参见各位长老。' }
+      ],
+      transition: '宗主出现'
+    });
+    scenes.push({
+      location: '宗主大殿',
+      description: '宗主亲自召见叶尘，告知他一个惊天秘密。',
+      dialogues: [
+        { role: '宗主', action: '(严肃)', text: '叶尘，你可知道万年前那场仙魔大战？' },
+        { role: '叶尘', action: '(点头)', text: '弟子略有耳闻。' },
+        { role: '宗主', action: '(压低声音)', text: '魔族...即将卷土重来了。' }
+      ],
+      transition: '叶尘心中一凛'
+    });
+    scenes.push({
+      location: '青云宗外',
+      description: '魔族先遣部队袭击青云宗，叶尘挺身而出。',
+      dialogues: [
+        { role: '魔族首领', action: '(狂笑)', text: '区区人族，也敢挡我魔族大军？' },
+        { role: '叶尘', action: '(挡在众人面前)', text: '有我在，你们休想踏进青云宗一步！' },
+        { role: '苏清雪', action: '(并肩而立)', text: '我帮你！' }
+      ],
+      transition: '大战一触即发'
+    });
+    scenes.push({
+      location: '战场',
+      description: '叶尘施展《九转玄功》，力战魔族首领，最终将其击退。',
+      dialogues: [
+        { role: '魔族首领', action: '(震惊)', text: '九转玄功？！你是玄天仙尊的传人？！' },
+        { role: '叶尘', action: '(剑指对方)', text: '知道就好，滚回你们的魔界！' },
+        { role: '魔族首领', action: '(不甘心地撤退)', text: '这笔账，我记下了！' },
+        { role: '冷凝霜', action: '(扶住叶尘)', text: '你没事吧？' }
+      ],
+      transition: '众人欢呼'
+    });
+  } else {
+    scenes.push({
+      location: '闭关密室',
+      description: '叶尘闭关冲击金丹期，经历天劫考验。',
+      dialogues: [
+        { role: '叶尘', action: '(盘坐)', text: '金丹期...给我破！' },
+        { role: '天雷', action: '(轰鸣)', text: '(九道天雷劈下)' },
+        { role: '苏清雪', action: '(在密室外焦急)', text: '叶尘！你一定要撑住！' }
+      ],
+      transition: '最后一道天雷劈下'
+    });
+    scenes.push({
+      location: '密室',
+      description: '叶尘成功渡过天劫，凝结金丹，实力暴涨。',
+      dialogues: [
+        { role: '叶尘', action: '(睁开双眼)', text: '金丹期...这就是金丹期的力量！' },
+        { role: '冷凝霜', action: '(惊喜)', text: '你成功了！' },
+        { role: '叶尘', action: '(微笑)', text: '谢谢你们一直陪着我。' }
+      ],
+      transition: '叶尘走出密室'
+    });
+    scenes.push({
+      location: '青云宗广场',
+      description: '叶尘被破格提升为真传弟子，全宗庆祝。',
+      dialogues: [
+        { role: '宗主', action: '(宣布)', text: '从今日起，叶尘为我青云宗真传弟子！' },
+        { role: '众弟子', action: '(欢呼)', text: '叶师兄！叶师兄！' },
+        { role: '叶尘', action: '(抱拳)', text: '弟子定不负宗门期望！' }
+      ],
+      transition: '烟花绽放'
+    });
+    scenes.push({
+      location: '山巅',
+      description: '叶尘站在山巅，眺望远方，准备迎接更大的挑战。',
+      dialogues: [
+        { role: '叶尘', action: '(自语)', text: '魔族、仙界、神界...等着我。' },
+        { role: '苏清雪', action: '(走来)', text: '不管去哪，我陪你。' },
+        { role: '冷凝霜', action: '(也走来)', text: '还有我。' },
+        { role: '叶尘', action: '(笑)', text: '有你们，何惧天下！' }
+      ],
+      transition: '三人并肩而立，风云变幻'
+    });
+  }
+  return { title: title, scenes: scenes };
+}
+
+function generateSweetEpisode(epNum, title) {
+  const scenes = [];
+  if (epNum === 1) {
+    scenes.push({
+      location: '咖啡厅',
+      description: '夏小暖在咖啡厅打工，不小心把咖啡洒在了顾北辰身上。',
+      dialogues: [
+        { role: '夏小暖', action: '(慌张)', text: '对不起对不起！我不是故意的！' },
+        { role: '顾北辰', action: '(皱眉看着西装)', text: '你知道这套西装多少钱吗？' },
+        { role: '夏小暖', action: '(快要哭出来)', text: '我...我赔不起...' }
+      ],
+      transition: '顾北辰看着她的样子'
+    });
+    scenes.push({
+      location: '咖啡厅',
+      description: '顾北辰提出让夏小暖去他家当保姆抵债。',
+      dialogues: [
+        { role: '顾北辰', action: '(突然说)', text: '不用赔了，来我家当保姆吧。' },
+        { role: '夏小暖', action: '(愣住)', text: '啊？' },
+        { role: '顾北辰', action: '(转身离开)', text: '明天来报到。地址我发你。' }
+      ],
+      transition: '夏小暖一脸懵'
+    });
+    scenes.push({
+      location: '顾北辰别墅',
+      description: '夏小暖第一天上班，发现顾北辰家大得离谱。',
+      dialogues: [
+        { role: '夏小暖', action: '(惊叹)', text: '这...这房子比我学校还大！' },
+        { role: '顾北辰', action: '(从楼上下来)', text: '愣着干嘛？开始干活。' },
+        { role: '夏小暖', action: '(嘟嘴)', text: '凶什么凶...' }
+      ],
+      transition: '顾北辰嘴角微扬'
+    });
+    scenes.push({
+      location: '厨房',
+      description: '夏小暖做了一顿丰盛的晚餐，顾北辰意外地发现很好吃。',
+      dialogues: [
+        { role: '顾北辰', action: '(尝了一口)', text: '味道...还不错。' },
+        { role: '夏小暖', action: '(开心)', text: '那当然！我可是有厨师证的！' },
+        { role: '顾北辰', action: '(看着她灿烂的笑容)', text: '(心中一动)' }
+      ],
+      transition: '温馨的氛围'
+    });
+  } else if (epNum === 2) {
+    scenes.push({
+      location: '顾北辰别墅',
+      description: '夏小暖在顾北辰家住了几天，两人逐渐熟悉。',
+      dialogues: [
+        { role: '夏小暖', action: '(打扫时哼歌)', text: '(哼着轻快的小曲)' },
+        { role: '顾北辰', action: '(在书房听到)', text: '(不自觉地微笑)' },
+        { role: '林雅', action: '(突然来访)', text: '北辰哥哥！我来看你了！' }
+      ],
+      transition: '夏小暖从厨房探出头'
+    });
+    scenes.push({
+      location: '客厅',
+      description: '林雅是顾北辰的青梅竹马，看到夏小暖后充满敌意。',
+      dialogues: [
+        { role: '林雅', action: '(打量夏小暖)', text: '你是谁？怎么在北辰哥哥家？' },
+        { role: '夏小暖', action: '(解释)', text: '我是这里的保姆...' },
+        { role: '林雅', action: '(轻蔑)', text: '保姆？就你这样的？' }
+      ],
+      transition: '顾北辰下楼'
+    });
+    scenes.push({
+      location: '客厅',
+      description: '顾北辰维护夏小暖，林雅气得离开。',
+      dialogues: [
+        { role: '顾北辰', action: '(冷冷地)', text: '林雅，她是我的客人，注意你的言辞。' },
+        { role: '林雅', action: '(委屈)', text: '北辰哥哥！你为了这个保姆凶我？' },
+        { role: '顾北辰', action: '(不容置疑)', text: '送客。' }
+      ],
+      transition: '林雅哭着离开'
+    });
+    scenes.push({
+      location: '厨房',
+      description: '夏小暖感谢顾北辰，顾北辰却嘴硬说是为了家里清净。',
+      dialogues: [
+        { role: '夏小暖', action: '(感激)', text: '谢谢你刚才帮我。' },
+        { role: '顾北辰', action: '(别过脸)', text: '别多想，我只是不想家里吵。' },
+        { role: '夏小暖', action: '(偷笑)', text: '嘴硬。' },
+        { role: '顾北辰', action: '(瞪她)', text: '你说什么？' }
+      ],
+      transition: '两人斗嘴，气氛轻松'
+    });
+  } else if (epNum === 3) {
+    scenes.push({
+      location: '大学教室',
+      description: '夏小暖回到学校上课，发现顾北辰竟然是学校的客座教授。',
+      dialogues: [
+        { role: '夏小暖', action: '(惊讶)', text: '怎么是你？！' },
+        { role: '顾北辰', action: '(在讲台上)', text: '安静。今天讲商业案例分析。' },
+        { role: '同学甲', action: '(小声)', text: '小暖，你认识顾教授？' }
+      ],
+      transition: '夏小暖尴尬地坐下'
+    });
+    scenes.push({
+      location: '教室',
+      description: '顾北辰在课堂上故意提问夏小暖，让她出丑。',
+      dialogues: [
+        { role: '顾北辰', action: '(点名)', text: '夏小暖同学，你来回答这个问题。' },
+        { role: '夏小暖', action: '(站起来支吾)', text: '我...我觉得...' },
+        { role: '顾北辰', action: '(走近)', text: '昨晚我教你的都忘了？' }
+      ],
+      transition: '全班哗然'
+    });
+    scenes.push({
+      location: '学校走廊',
+      description: '下课后，夏小暖气冲冲地找顾北辰理论。',
+      dialogues: [
+        { role: '夏小暖', action: '(生气)', text: '你故意让我难堪！' },
+        { role: '顾北辰', action: '(无辜)', text: '我只是在督促你学习。' },
+        { role: '夏小暖', action: '(跺脚)', text: '谁要你督促！' }
+      ],
+      transition: '顾北辰突然靠近'
+    });
+    scenes.push({
+      location: '走廊',
+      description: '顾北辰突然靠近夏小暖，两人距离极近。',
+      dialogues: [
+        { role: '顾北辰', action: '(低声)', text: '那你想要谁督促？' },
+        { role: '夏小暖', action: '(脸红心跳)', text: '你...你靠太近了...' },
+        { role: '顾北辰', action: '(轻笑)', text: '这就脸红了？' },
+        { role: '夏小暖', action: '(推开他跑掉)', text: '变态！' }
+      ],
+      transition: '顾北辰看着她的背影，笑容温柔'
+    });
+  } else if (epNum === 4) {
+    scenes.push({
+      location: '顾北辰别墅',
+      description: '夏小暖生病发烧，顾北辰紧张地照顾她。',
+      dialogues: [
+        { role: '夏小暖', action: '(迷迷糊糊)', text: '冷...好冷...' },
+        { role: '顾北辰', action: '(焦急)', text: '医生怎么还没来！' },
+        { role: '夏小暖', action: '(抓住他的手)', text: '别走...' }
+      ],
+      transition: '顾北辰握紧她的手'
+    });
+    scenes.push({
+      location: '夏小暖房间',
+      description: '夏小暖醒来，发现顾北辰趴在床边睡着了。',
+      dialogues: [
+        { role: '夏小暖', action: '(感动)', text: '这个傻瓜...守了一晚上吗？' },
+        { role: '顾北辰', action: '(醒来)', text: '你醒了？还难受吗？' },
+        { role: '夏小暖', action: '(摇头)', text: '好多了...谢谢你。' }
+      ],
+      transition: '两人对视，气氛暧昧'
+    });
+    scenes.push({
+      location: '别墅花园',
+      description: '夏小暖康复后，顾北辰带她去看星星。',
+      dialogues: [
+        { role: '夏小暖', action: '(仰望星空)', text: '好漂亮...我从没见过这么多星星。' },
+        { role: '顾北辰', action: '(看着她)', text: '嗯，很漂亮。' },
+        { role: '夏小暖', action: '(转头)', text: '你在看星星还是看我？' }
+      ],
+      transition: '顾北辰没有回答'
+    });
+    scenes.push({
+      location: '花园',
+      description: '顾北辰终于表白，夏小暖感动落泪。',
+      dialogues: [
+        { role: '顾北辰', action: '(认真)', text: '夏小暖，我喜欢你。从你把咖啡洒在我身上的那一刻起。' },
+        { role: '夏小暖', action: '(眼泪掉下来)', text: '你这个笨蛋...为什么不早说...' },
+        { role: '顾北辰', action: '(擦她的眼泪)', text: '因为我想确定，这不是一时冲动。' },
+        { role: '夏小暖', action: '(扑进他怀里)', text: '我也喜欢你！' }
+      ],
+      transition: '月光下，两人相拥'
+    });
+  } else {
+    scenes.push({
+      location: '顾氏集团',
+      description: '顾北辰带夏小暖参加公司年会，正式介绍给所有人。',
+      dialogues: [
+        { role: '顾北辰', action: '(牵着她的手)', text: '各位，这是我女朋友，夏小暖。' },
+        { role: '员工们', action: '(惊讶)', text: '顾总竟然有女朋友了？！' },
+        { role: '夏小暖', action: '(害羞)', text: '大家好...' }
+      ],
+      transition: '林雅在角落咬牙切齿'
+    });
+    scenes.push({
+      location: '年会现场',
+      description: '林雅故意刁难夏小暖，却被夏小暖机智化解。',
+      dialogues: [
+        { role: '林雅', action: '(嘲讽)', text: '夏小姐穿成这样，是买不起礼服吗？' },
+        { role: '夏小暖', action: '(微笑)', text: '这件是北辰亲手为我挑的，他说我穿什么都好看。' },
+        { role: '林雅', action: '(脸色铁青)', text: '你...' }
+      ],
+      transition: '顾北辰走来'
+    });
+    scenes.push({
+      location: '顾北辰办公室',
+      description: '顾北辰向夏小暖求婚，准备了巨大的惊喜。',
+      dialogues: [
+        { role: '顾北辰', action: '(单膝跪地)', text: '夏小暖，嫁给我。' },
+        { role: '夏小暖', action: '(捂嘴)', text: '你...你认真的？' },
+        { role: '顾北辰', action: '(拿出戒指)', text: '我从没这么认真过。' }
+      ],
+      transition: '夏小暖含泪点头'
+    });
+    scenes.push({
+      location: '海边',
+      description: '两人举行简单的婚礼，只有最亲近的人参加。',
+      dialogues: [
+        { role: '牧师', action: '(庄严)', text: '顾北辰先生，你愿意娶夏小暖小姐为妻吗？' },
+        { role: '顾北辰', action: '(深情)', text: '我愿意。' },
+        { role: '牧师', action: '(问)', text: '夏小暖小姐，你愿意吗？' },
+        { role: '夏小暖', action: '(幸福)', text: '我愿意！' }
+      ],
+      transition: '海浪声中，两人拥吻'
+    });
+  }
+  return { title: title, scenes: scenes };
+}
+
+function generateGenericEpisode(epNum, title, type) {
+  const scenes = [];
+  const roles = type === '悬疑推理' ? ['侦探陈默', '助手小刘', '嫌疑人张某', '受害者家属', '法医'] :
+                type === '古装权谋' ? ['皇子李琰', '谋士赵先生', '贵妃娘娘', '大将军', '太监总管'] :
+                type === '家庭伦理' ? ['父亲老王', '母亲李阿姨', '大儿子', '小女儿', '女婿'] :
+                ['主角', '配角A', '配角B', '反派', '朋友'];
+
+  const locations = type === '悬疑推理' ? ['案发现场', '警局', '嫌疑人住所', '法医室', '街头'] :
+                    type === '古装权谋' ? ['皇宫大殿', '御花园', '书房', '军营', '酒楼'] :
+                    type === '家庭伦理' ? ['家中客厅', '医院', '公司', '餐厅', '公园'] :
+                    ['场景一', '场景二', '场景三', '场景四', '场景五'];
+
+  const plotPoints = [
+    '故事拉开序幕，主角登场，命运齿轮开始转动',
+    '冲突逐渐显现，主角面临第一个重大挑战',
+    '危机升级，主角陷入两难境地',
+    '真相开始浮出水面，局势出现转机',
+    '高潮到来，主角做出关键抉择'
+  ];
+
+  for (let s = 0; s < 4; s++) {
+    const location = locations[s % locations.length];
+    const desc = plotPoints[(epNum - 1 + s) % plotPoints.length] + '。' + (s === 0 ? '气氛紧张，各方势力暗流涌动。' : s === 1 ? '对话中暗藏机锋，每个人物都有自己的算盘。' : s === 2 ? '情节急转直下，意想不到的事情发生了。' : '为下一集埋下伏笔，悬念丛生。');
+    const dialogues = [];
+    for (let d = 0; d < 3; d++) {
+      const role = roles[d % roles.length];
+      const action = s === 0 ? '(神情凝重)' : s === 1 ? '(语气坚定)' : s === 2 ? '(面露惊讶)' : '(意味深长)';
+      const text = d === 0 ? '事情远比我们想象的复杂。' : d === 1 ? '不管前方有多少困难，我都不会退缩。' : '这一切，才刚刚开始。';
+      dialogues.push({ role: role, action: action, text: text });
+    }
+    scenes.push({
+      location: location,
+      description: desc,
+      dialogues: dialogues,
+      transition: s < 3 ? '场景转换，故事继续推进...' : '本集结束，敬请期待下集。'
+    });
+  }
+  return { title: title, scenes: scenes };
+}
+
+function generateExtraEpisode(epNum, outline, type, isCross, isBusiness, isCultivation, isSweet, prevEpisodes) {
+  const lastEp = prevEpisodes[prevEpisodes.length - 1];
+  const scenes = [];
+
+  if (isCross) {
+    const locations = ['皇宫花园', '太子书房', '冷宫', '大殿', '御膳房', '宫墙外'];
+    const titles = ['宫廷风云', '情愫暗生', '危机再临', '智斗贵妃', '太子心事', '新的旅程'];
+    const title = titles[(epNum - 6) % titles.length];
+    for (let s = 0; s < 4; s++) {
+      const loc = locations[s % locations.length];
+      scenes.push({
+        location: loc,
+        description: '第' + epNum + '集剧情继续发展。苏小暖在古代的生活越来越精彩，与太子的关系也日渐微妙。',
+        dialogues: [
+          { role: '苏小暖', action: '(自信地)', text: '我可是来自21世纪的新女性，这点困难难不倒我！' },
+          { role: '太子萧瑾', action: '(无奈又宠溺)', text: '你又在打什么鬼主意？' },
+          { role: '苏小暖', action: '(眨眼)', text: '殿下，要不要跟我一起做直播？保证让你火遍全京城！' }
+        ],
+        transition: s < 3 ? '故事继续...' : '下集更精彩'
+      });
+    }
+    return { title: title, scenes: scenes };
+  }
+
+  if (isBusiness) {
+    const titles = ['商业扩张', '新的挑战', '国际布局', '终极对决', '商业传奇'];
+    const title = titles[(epNum - 6) % titles.length];
+    for (let s = 0; s < 4; s++) {
+      scenes.push({
+        location: ['办公室', '会议室', '机场', '酒店'][s],
+        description: '林凡的商业帝国不断壮大，新的挑战也随之而来。',
+        dialogues: [
+          { role: '林凡', action: '(沉稳地)', text: '商海沉浮，唯有不断前进才能立于不败之地。' },
+          { role: '苏晴', action: '(支持地)', text: '不管遇到什么，我都会陪在你身边。' },
+          { role: '秘书小李', action: '(汇报)', text: '林总，新的项目已经准备就绪。' }
+        ],
+        transition: s < 3 ? '商业战场风云变幻...' : '敬请期待'
+      });
+    }
+    return { title: title, scenes: scenes };
+  }
+
+  if (isCultivation) {
+    const titles = ['仙路漫漫', '宗门大比', '魔族阴谋', '飞升之路', '仙尊归来'];
+    const title = titles[(epNum - 6) % titles.length];
+    for (let s = 0; s < 4; s++) {
+      scenes.push({
+        location: ['修炼室', '演武场', '秘境', '山巅'][s],
+        description: '叶尘的修仙之路越走越远，更强的敌人也在暗中窥伺。',
+        dialogues: [
+          { role: '叶尘', action: '(坚定)', text: '修仙之路，逆天改命，我绝不会停下脚步！' },
+          { role: '冷凝霜', action: '(担忧)', text: '叶尘，最近魔族活动频繁，你要小心。' },
+          { role: '苏清雪', action: '(鼓励)', text: '我们相信你，你一定能成为最强的仙尊！' }
+        ],
+        transition: s < 3 ? '修仙之路充满挑战...' : '下集见'
+      });
+    }
+    return { title: title, scenes: scenes };
+  }
+
+  if (isSweet) {
+    const titles = ['甜蜜日常', '小别重逢', '误会解除', '见家长', '幸福生活'];
+    const title = titles[(epNum - 6) % titles.length];
+    for (let s = 0; s < 4; s++) {
+      scenes.push({
+        location: ['家中', '商场', '餐厅', '公园'][s],
+        description: '顾北辰和夏小暖的甜蜜生活继续，每一天都充满欢笑。',
+        dialogues: [
+          { role: '夏小暖', action: '(撒娇)', text: '北辰，我想吃冰淇淋！' },
+          { role: '顾北辰', action: '(宠溺)', text: '好，买。不过只能吃一个。' },
+          { role: '夏小暖', action: '(开心)', text: '耶！老公最好了！' }
+        ],
+        transition: s < 3 ? '甜蜜继续...' : '永远幸福'
+      });
+    }
+    return { title: title, scenes: scenes };
+  }
+
+  const genericTitles = ['新的篇章', '风云再起', '真相逼近', '命运抉择', '最终对决', '圆满结局'];
+  const title = genericTitles[(epNum - 6) % genericTitles.length];
+  for (let s = 0; s < 4; s++) {
+    scenes.push({
+      location: '场景' + (s + 1),
+      description: '第' + epNum + '集剧情推进，故事进入新的阶段。',
+      dialogues: [
+        { role: '主角', action: '(坚定)', text: '不管前路如何，我都不会放弃。' },
+        { role: '配角', action: '(支持)', text: '我会一直陪在你身边。' },
+        { role: '反派', action: '(冷笑)', text: '你们太天真了，真正的游戏才刚刚开始。' }
+      ],
+      transition: s < 3 ? '剧情继续...' : '敬请期待'
+    });
+  }
+  return { title: title, scenes: scenes };
+}
+
+function buildPlainText(title, type, episodes, episodesData) {
+  let text = title + '\n';
+  text += '类型：' + type + ' | 集数：' + episodes + '\n';
+  text += '='.repeat(40) + '\n\n';
+  for (let i = 0; i < episodesData.length; i++) {
+    const ep = episodesData[i];
+    text += '第' + (i + 1) + '集：' + ep.title + '\n';
+    text += '-'.repeat(30) + '\n';
+    for (let s = 0; s < ep.scenes.length; s++) {
+      const scene = ep.scenes[s];
+      text += '场景' + (s + 1) + '：' + scene.location + '\n';
+      text += scene.description + '\n';
+      for (let d = 0; d < scene.dialogues.length; d++) {
+        const dia = scene.dialogues[d];
+        text += dia.role + ' ' + dia.action + '：' + dia.text + '\n';
+      }
+      if (scene.transition) {
+        text += '【转场】' + scene.transition + '\n';
+      }
+      text += '\n';
+    }
+    text += '\n';
+  }
+  return text;
+}
+
+// ===== Export Script =====
+function exportScript() {
+  if (!generatedScriptData) {
+    showToast('请先生成剧本', 'error');
+    return;
+  }
+  const title = document.getElementById('scriptTitle').value.trim() || '未命名剧本';
+  const blob = new Blob([generatedScriptData.text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = title + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('剧本已导出！', 'success');
+}
+
+// ===== Init =====
+document.addEventListener('DOMContentLoaded', function() {
+  const firstType = document.querySelector('#typeTags .tag');
+  if (firstType) { firstType.classList.add('selected'); selectedType = firstType.textContent; }
+});
+</script>
+</body>
+</html>
